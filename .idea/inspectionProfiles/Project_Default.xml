@@ -1,0 +1,75 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E501" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N806" />
+          <option value="N801" />
+          <option value="N802" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyRedeclarationInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="main.transform" />
+          <option value="random.random.randrange" />
+          <option value="main.widget.button_enter_to_guide" />
+          <option value="main.widget.button_to_admin" />
+          <option value="main.widget.my_plants" />
+          <option value="main.firstWidget.button_enter_to_guide" />
+          <option value="main.firstWidget.my_plants" />
+          <option value="main.firstWidget.button_to_admin" />
+          <option value="main.secondWindow.label_1" />
+          <option value="main.secondWindow.label_2" />
+          <option value="main.secondWindow.label_3" />
+          <option value="main.secondWindow.label_4" />
+          <option value="main.secondWindow.text1" />
+          <option value="main.roomPlants.listWidget" />
+          <option value="PyQt5.QtWidgets.ListWidget" />
+          <option value="main.gardenPlants.listWidget" />
+          <option value="main.kailyardPlants.listWidget" />
+          <option value="main.showPlant.l_like" />
+          <option value="main.showPlant.l_Image" />
+          <option value="main.showPlant.button_toMenu" />
+          <option value="main.showPlant.l_Name" />
+          <option value="main.addPlants.plantName" />
+          <option value="main.addPlants.viewImage" />
+          <option value="main.updatePlantsNow.textEdit" />
+          <option value="main.updatePlantsNow.viewImage" />
+          <option value="main.updatePlantsNow.finallyUpdateplant" />
+          <option value="main.updatePlantsNow.loadImage" />
+          <option value="main.updatePlantsNow.addImage" />
+          <option value="main.updatePlantsNow.refresh" />
+          <option value="main.updatePlantsNow.group" />
+          <option value="main.updatePlantsNow.type" />
+          <option value="main.updatePlantsNow.plantName" />
+          <option value="main.updatePlantsNow.exit" />
+          <option value="main.firstWidget.newPlant" />
+          <option value="main.addPlants.loadImage" />
+          <option value="main.addPlants.addImage" />
+          <option value="main.addPlants.exit" />
+          <option value="main.addPlants.finallyAddplant" />
+          <option value="main.addPlants.newPlant1" />
+          <option value="main.addPlants.refresh" />
+          <option value="main.addPlants.type" />
+          <option value="main.addPlants.group" />
+          <option value="main.addPlants.comboBox" />
+          <option value="main.showLiked.listWidget" />
+          <option value="main.showLiked.button_toMenu" />
+          <option value="random.random.randint" />
+          <option value="pygame" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
