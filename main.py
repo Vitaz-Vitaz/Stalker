@@ -51,7 +51,7 @@ class Player(Sprite):
         self.go_right = False
         self.go_left = False
         for i in range(5):
-            img = pygame.image.load('imges/' + typePlayer + '/faza/' + self.a[i] + '.png')
+            img = pygame.image.load('imges/' + typePlayer + '/calm/' + self.a[i] + '.png')
             img = pygame.transform.scale(img,
                                          (int(img.get_width() * k), int(img.get_height() * k)))
             temp_list.append(img)
