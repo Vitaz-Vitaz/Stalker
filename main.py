@@ -1,3 +1,5 @@
+import os
+
 import pygame
 
 pygame.init()
@@ -42,27 +44,25 @@ sprite_group = SpriteGroup()
 class Player(Sprite):
     def __init__(self, pX, pY, k, skorost, typePlayer, faza):
         super().__init__(sprite_group)
-        self.a = ["first", "second", "third", "forth", "fifth"]
+        self.a = ["first", "second", "third", "forth", "fifth", "sixth"]
         self.sprites = list()
         self.faza_now = 0
         self.action = 0
-        temp_list = []
-        self.jumpSpeed = -45
+        self.isJump = True
+        self.jumpSpeed = -75
         self.go_right = False
         self.go_left = False
-        for i in range(5):
-            img = pygame.image.load('imges/' + typePlayer + '/calm/' + self.a[i] + '.png')
-            img = pygame.transform.scale(img,
-                                         (int(img.get_width() * k), int(img.get_height() * k)))
-            temp_list.append(img)
-        self.sprites.append(temp_list)
-        temp_list = []
-        for i in range(6):
-            img = pygame.image.load('imges/' + typePlayer + '/running/' + str(i) + '.png')
-            img = pygame.transform.scale(img,
-                                         (int(img.get_width() * k), int(img.get_height() * k)))
-            temp_list.append(img)
-        self.sprites.append(temp_list)
+        faza_type = ['calm', 'running', 'jumping']
+        for h in faza_type:
+            temp_list = []
+            kolvo = len(os.listdir('imges/' + typePlayer + '/' + h))
+            for i in range(kolvo):
+                img = pygame.image.load('imges/' + typePlayer + '/' + h + '/' + self.a[i] + '.png')
+                img = pygame.transform.scale(img,
+                                             (int(img.get_width() * k), int(img.get_height() * k)))
+                temp_list.append(img)
+            self.sprites.append(temp_list)
+
         self.image = self.sprites[self.action][self.faza_now]
         print(len(self.sprites))
         self.rect = self.image.get_rect()
@@ -106,11 +106,13 @@ class Player(Sprite):
             self.rect.x += self.skorost
             self.menyem = True
             self.vlevoVpravo = 1
-        if self.jump:
+        if self.jump and not self.isJump:
             self.rect.y += self.jumpSpeed
             self.jump = False
+            self.isJump = True
         if self.rect.bottom > 300:
             self.rect.bottom = 300
+            self.isJump = False
         self.rect.y += GRAVITY
 
 
@@ -120,7 +122,9 @@ while running:
 
     stalker.drawPlayer()
     if stalker.live:
-        if stalker.go_left or stalker.go_right:
+        if stalker.isJump:
+            stalker.proverka(2)
+        elif stalker.go_left or stalker.go_right:
             stalker.proverka(1)
         else:
             stalker.proverka(0)
