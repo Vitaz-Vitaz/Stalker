@@ -3,14 +3,14 @@ import os
 import pygame
 
 pygame.init()
-WIDTH = 400
-HEIGHT = 400
+WIDTH = 700
+HEIGHT = 700
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 FPS = 60
 pygame.display.set_caption("Stalker")
-GRAVITY = 3
+GRAVITY = 4
 
 
 class SpriteGroup(pygame.sprite.Group):
@@ -98,6 +98,7 @@ class Player(Sprite):
             self.upDateTime = pygame.time.get_ticks()
 
     def move(self):
+        self.rect.y += GRAVITY
         if self.go_left:
             self.rect.x -= self.skorost
             self.menyem = True
@@ -113,7 +114,7 @@ class Player(Sprite):
         if self.rect.bottom > 300:
             self.rect.bottom = 300
             self.isJump = False
-        self.rect.y += GRAVITY
+
 
 
 stalker = Player(50, 50, 4, 15, "stalker", 0)
