@@ -11,7 +11,7 @@ clock = pygame.time.Clock()
 FPS = 60
 pygame.display.set_caption("Stalker")
 GRAVITY = 4
-
+pulka = pygame.image.load('')
 
 class SpriteGroup(pygame.sprite.Group):
 
