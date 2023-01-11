@@ -1,16 +1,42 @@
 import os
 
+import csv
 import pygame
 
 pygame.init()
 WIDTH = 700
 HEIGHT = 700
-
+ROWS = 16
+COLS = 150
+all_images = list()
+for i in range(20):
+    im = pygame.image.load("imges/blocks/" + str(i) + ".png")
+    im = pygame.transform.scale(im, (40, 40))
+    all_images.append(im)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 FPS = 60
 pygame.display.set_caption("Stalker")
 GRAVITY = 4
+font = pygame.font.SysFont('Futura', 40)
+level = 1
+all_world = []
+for r in range(ROWS):
+    a = [-1] * COLS
+    all_world.append(a)
+print(all_world)
+with open("level" + str(level) + ".csv", newline='') as csvfile:
+    r = csv.reader(csvfile, delimiter=',')
+    for x, ro in enumerate(r):
+
+        for y, block in enumerate(ro):
+            all_world[x][y] = int(block)
+print(all_world)
+
+
+def drawText(text, color, x, y):
+    im = font.render(text, True, color)
+    screen.blit(im, (x, y))
 
 
 class SpriteGroup(pygame.sprite.Group):
@@ -50,7 +76,7 @@ class Player(Sprite):
         self.action = 0
         self.isJump = True
         self.strelba = False
-        self.noe_am = am
+        self.now_am = am
         self.am = am
         self.jumpSpeed = -75
         self.go_right = False
@@ -70,7 +96,7 @@ class Player(Sprite):
             self.sprites.append(temp_list)
 
         self.image = self.sprites[self.action][self.faza_now]
-        print(len(self.sprites))
+
         self.rect = self.image.get_rect()
         self.rect.center = (pX, pY)
         self.pos = (pX, pY)
@@ -107,7 +133,6 @@ class Player(Sprite):
 
                 self.faza_now = 0
 
-
     def check_live(self):
         if self.health < 0:
             self.live = False
@@ -122,12 +147,12 @@ class Player(Sprite):
             self.upDateTime = pygame.time.get_ticks()
 
     def strelb(self):
-        if self.kolvoPul == 0 and self.noe_am > 0:
+        if self.kolvoPul == 0 and self.now_am > 0:
             self.kolvoPul = 20
             puly1 = Bullet(self.rect.centerx + (0.6 * self.rect.size[0] * self.vlevoVpravo),
                            self.rect.centery, self.vlevoVpravo)
             puly_group.add(puly1)
-            self.noe_am -= 1
+            self.now_am -= 1
 
     def move(self):
         self.rect.y += GRAVITY
@@ -146,6 +171,87 @@ class Player(Sprite):
         if self.rect.bottom > 300:
             self.rect.bottom = 300
             self.isJump = False
+
+    def moveForEnemy(self):
+        self.rect.y += GRAVITY
+        if self.rect.bottom > 300:
+            self.rect.bottom = 300
+
+
+class Bar():
+    def __init__(self, x, y, now, max):
+        self.x = x
+        self.y = y
+        self.now = now
+        self.max = max
+
+    def draw(self, now):
+        self.now = now
+        pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, 150, 20))
+        pygame.draw.rect(screen, (0, 255, 0), (self.x, self.y, 150 * (stalker.health / 5), 20))
+        pygame.draw.rect(screen, (255, 255, 255), (self.x - 2, self.y - 2, 154, 24), 1)
+
+
+class Box(Sprite):
+    def __init__(self, x, y, type):
+        pygame.sprite.Sprite.__init__(self)
+        self.type = type
+        self.image = pygame.image.load('imges/icons/' + type + '_box.png').convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+    def update(self):
+        if pygame.sprite.collide_rect(self, stalker):
+            if self.type == 'health':
+                if stalker.health < 5:
+                    stalker.health += 1
+            elif self.type == 'ammo':
+                if stalker.am < 20:
+                    stalker.am = 20
+            self.kill()
+
+
+box_group = pygame.sprite.Group()
+
+
+class AllWorld():
+    def __init__(self):
+        self.world = list()
+
+    def load_world(self, d):
+        for y, ro in enumerate(d):
+            for x, block in enumerate(ro):
+                print(block, len(all_images))
+                if block >= 0:
+                    im = all_images[block]
+                    imRect = im.get_rect()
+                    imRect.x = x * 40
+                    imRect.y = y * 40
+                    d = (im, imRect)
+                    if block <= 8:
+                        self.world.append(d)
+                    elif 9 <= block <= 10:
+                        pass
+                    elif 11 <= block <= 14:
+                        pass
+                    elif block == 15:
+                        stalker = Player(x * 40, y * 40, 1.65, 15, "stalker", 0, 20)
+                        healthBar = Bar(165, 45, stalker.health, stalker.Maxhealth)
+                    elif block == 16:
+                        enemy = Player(x * 40, y * 40, 1.65, 15, "stalker", 0, 20)
+                    elif block == 17:
+                        box1 = Box(x * 40, y * 40, 'ammo')
+                        box_group.add(box1)
+                    elif block == 19:
+                        box1 = Box(x * 40, y * 40, 'health')
+                        box_group.add(box1)
+                    elif block == 20:
+                        pass
+        return stalker, healthBar
+
+
+world = AllWorld()
+stalker, healthBar = world.load_world(all_world)
 
 
 class Bullet(Sprite):
@@ -173,15 +279,26 @@ class Bullet(Sprite):
 
 puly_group = pygame.sprite.Group()
 
-stalker = Player(50, 50, 4, 15, "stalker", 0, 20)
-enemy = Player(150, 150, 4, 15, "stalker", 0, 20)
+box1 = Box(300, 300, 'health')
+box_group.add(box1)
+
+enemy = Player(150, 150, 1.65, 15, "stalker", 0, 20)
 running = True
 
 while running:
-    print(stalker.strelba)
+
     enemy.drawPlayer()
     enemy.update()
+    healthBar.draw(stalker.health)
+
+    box_group.update()
+    box_group.draw(screen)
     stalker.drawPlayer()
+    enemy.moveForEnemy()
+    drawText('Количество пуль: ', (255, 255, 255), 10, 10)
+    drawText('Здоровье: ', (255, 255, 255), 10, 40)
+    for i in range(stalker.now_am):
+        screen.blit(pygame.image.load('imges/icons/qbullet.png').convert_alpha(), (260 + (i * 10), 17))
     puly_group.update()
     puly_group.draw(screen)
     if stalker.live:
@@ -208,7 +325,6 @@ while running:
                     stalker.jump = True
                 if ev.key == pygame.K_SPACE:
                     stalker.strelba = True
-                    print(445)
 
                 if ev.key == pygame.K_ESCAPE:
                     running = False
