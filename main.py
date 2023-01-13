@@ -4,12 +4,12 @@ import csv
 import pygame
 
 pygame.init()
-WIDTH = 700
-HEIGHT = 700
+WIDTH = 800
+HEIGHT = 640
 ROWS = 16
 COLS = 150
 all_images = list()
-for i in range(20):
+for i in range(21):
     im = pygame.image.load("imges/blocks/" + str(i) + ".png")
     im = pygame.transform.scale(im, (40, 40))
     all_images.append(im)
@@ -17,7 +17,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 FPS = 60
 pygame.display.set_caption("Stalker")
-GRAVITY = 4
+GRAVITY = 2
 font = pygame.font.SysFont('Futura', 40)
 level = 1
 all_world = []
@@ -74,11 +74,11 @@ class Player(Sprite):
         self.sprites = list()
         self.faza_now = 0
         self.action = 0
-        self.isJump = True
+        self.isJump = False
         self.strelba = False
         self.now_am = am
         self.am = am
-        self.jumpSpeed = -75
+        self.jumpSpeed = -55
         self.go_right = False
         self.go_left = False
         self.health = 5
@@ -96,7 +96,8 @@ class Player(Sprite):
             self.sprites.append(temp_list)
 
         self.image = self.sprites[self.action][self.faza_now]
-
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
         self.rect = self.image.get_rect()
         self.rect.center = (pX, pY)
         self.pos = (pX, pY)
@@ -107,6 +108,7 @@ class Player(Sprite):
         self.upDateTime = pygame.time.get_ticks()
         self.skorost = skorost
         self.live = True
+        self.cy = 0
 
     def drawPlayer(self):
         if self.vlevoVpravo == 1:
@@ -155,22 +157,53 @@ class Player(Sprite):
             self.now_am -= 1
 
     def move(self):
-        self.rect.y += GRAVITY
-        if self.go_left:
+
+        couldGoRight = True
+        couldGoLeft = True
+
+        nY = 0
+        if self.jump and not self.isJump:
+            self.cy = -25
+            self.jump = False
+            self.isJump = True
+        self.cy += GRAVITY
+        if self.cy > 10:
+            self.cy = 0
+        nY += self.cy
+
+        for block in world.world:
+            if block[1].colliderect(self.rect.x, self.rect.y + nY, self.width, self.height):
+                if self.cy >= 0:
+                    self.cy = 0
+                    nY = block[1].top - self.rect.bottom
+                    self.isJump = False
+                elif self.cy < 0:
+                    self.cy = 0
+                    nY = block[1].bottom - self.rect.top
+
+        for block in world.world:
+            if block[1].colliderect(self.rect.x + self.skorost, self.rect.y, self.width, self.height):
+                couldGoRight = False
+                break
+            else:
+                couldGoRight = True
+
+        for block in world.world:
+            if block[1].colliderect(self.rect.x - self.skorost, self.rect.y, self.width, self.height):
+                couldGoLeft = False
+                break
+            else:
+                couldGoLeft = True
+        if self.go_left and couldGoLeft:
             self.rect.x -= self.skorost
             self.menyem = True
             self.vlevoVpravo = -1
-        if self.go_right:
+        if self.go_right and couldGoRight:
             self.rect.x += self.skorost
             self.menyem = True
             self.vlevoVpravo = 1
-        if self.jump and not self.isJump:
-            self.rect.y += self.jumpSpeed
-            self.jump = False
-            self.isJump = True
-        if self.rect.bottom > 300:
-            self.rect.bottom = 300
-            self.isJump = False
+
+        self.rect.y += nY
 
     def moveForEnemy(self):
         self.rect.y += GRAVITY
@@ -190,6 +223,30 @@ class Bar():
         pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, 150, 20))
         pygame.draw.rect(screen, (0, 255, 0), (self.x, self.y, 150 * (stalker.health / 5), 20))
         pygame.draw.rect(screen, (255, 255, 255), (self.x - 2, self.y - 2, 154, 24), 1)
+
+
+class WaterBlock(Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + 20, y + (40 - self.image.get_height()))
+
+
+class ExitBlock(Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + 20, y + (40 - self.image.get_height()))
+
+
+class Decor(Sprite):
+    def __init__(self, img, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + 20, y + (40 - self.image.get_height()))
 
 
 class Box(Sprite):
@@ -212,6 +269,9 @@ class Box(Sprite):
 
 
 box_group = pygame.sprite.Group()
+decor_group = pygame.sprite.Group()
+exit_group = pygame.sprite.Group()
+water_group = pygame.sprite.Group()
 
 
 class AllWorld():
@@ -231,11 +291,14 @@ class AllWorld():
                     if block <= 8:
                         self.world.append(d)
                     elif 9 <= block <= 10:
-                        pass
+                        water = WaterBlock(im, x * 40, y * 40)
+                        water_group.add(water)
                     elif 11 <= block <= 14:
-                        pass
+
+                        dec = Decor(im, x * 40, y * 40)
+                        decor_group.add(dec)
                     elif block == 15:
-                        stalker = Player(x * 40, y * 40, 1.65, 15, "stalker", 0, 20)
+                        stalker = Player(x * 40, y * 40, 1.65, 4, "stalker", 0, 20)
                         healthBar = Bar(165, 45, stalker.health, stalker.Maxhealth)
                     elif block == 16:
                         enemy = Player(x * 40, y * 40, 1.65, 15, "stalker", 0, 20)
@@ -246,8 +309,13 @@ class AllWorld():
                         box1 = Box(x * 40, y * 40, 'health')
                         box_group.add(box1)
                     elif block == 20:
-                        pass
+                        exit = ExitBlock(im, x * 40, y * 40)
+                        exit_group.add(exit)
         return stalker, healthBar
+
+    def draw(self):
+        for block in self.world:
+            screen.blit(block[0], block[1])
 
 
 world = AllWorld()
@@ -290,9 +358,15 @@ while running:
     enemy.drawPlayer()
     enemy.update()
     healthBar.draw(stalker.health)
-
+    world.draw()
     box_group.update()
     box_group.draw(screen)
+    decor_group.draw(screen)
+    exit_group.draw(screen)
+    exit_group.update()
+    water_group.draw(screen)
+    water_group.update()
+    decor_group.update()
     stalker.drawPlayer()
     enemy.moveForEnemy()
     drawText('Количество пуль: ', (255, 255, 255), 10, 10)
